@@ -17,7 +17,7 @@ import throttlerConfig from './config/throttler.config';
       validationSchema,
       load: [appConfig, databaseConfig, jwtConfig, corsConfig, throttlerConfig],
       validationOptions: {
-        allowUnknown: false,
+        allowUnknown: true,
         abortEarly: true,
       },
     }),

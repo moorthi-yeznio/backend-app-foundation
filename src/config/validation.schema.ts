@@ -22,4 +22,4 @@ export const validationSchema = Joi.object({
     .default('info'),
   THROTTLE_TTL: Joi.number().default(60000),
   THROTTLE_LIMIT: Joi.number().default(100),
-});
+}).unknown(true);

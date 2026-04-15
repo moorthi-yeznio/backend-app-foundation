@@ -11,6 +11,7 @@ import corsConfig from './config/cors.config';
 import throttlerConfig from './config/throttler.config';
 import { PrismaModule } from './database/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { RbacModule } from './rbac/rbac.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     AuthModule,
+    RbacModule,
   ],
   controllers: [AppController],
   providers: [AppService],

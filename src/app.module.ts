@@ -10,6 +10,7 @@ import jwtConfig from './config/jwt.config';
 import corsConfig from './config/cors.config';
 import throttlerConfig from './config/throttler.config';
 import { PrismaModule } from './database/prisma.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PrismaModule } from './database/prisma.module';
       ],
     }),
     PrismaModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

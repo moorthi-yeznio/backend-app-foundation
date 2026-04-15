@@ -9,6 +9,7 @@ import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import corsConfig from './config/cors.config';
 import throttlerConfig from './config/throttler.config';
+import { PrismaModule } from './database/prisma.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import throttlerConfig from './config/throttler.config';
         },
       ],
     }),
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -96,11 +96,12 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "prisma",
       "@nestjs/core",
-      "unrs-resolver",
-      "@scarf/scarf"
+      "@prisma/engines",
+      "@scarf/scarf",
+      "argon2",
+      "prisma",
+      "unrs-resolver"
     ]
   }
 }

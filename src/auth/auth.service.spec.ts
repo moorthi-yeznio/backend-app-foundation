@@ -59,7 +59,10 @@ describe('AuthService', () => {
 
   describe('register', () => {
     it('throws ConflictException if email already exists', async () => {
-      mockPrisma.user.findUnique.mockResolvedValue({ id: '1', email: 'test@test.com' });
+      mockPrisma.user.findUnique.mockResolvedValue({
+        id: '1',
+        email: 'test@test.com',
+      });
 
       await expect(
         service.register({ email: 'test@test.com', password: 'password123' }),
@@ -77,7 +80,10 @@ describe('AuthService', () => {
       mockJwt.signAsync.mockResolvedValue('mock-token');
       mockPrisma.refreshToken.create.mockResolvedValue({});
 
-      const result = await service.register({ email: 'new@test.com', password: 'password123' });
+      const result = await service.register({
+        email: 'new@test.com',
+        password: 'password123',
+      });
 
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
@@ -104,7 +110,7 @@ describe('AuthService', () => {
 
       expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith({
         where: { userId: 'user-1', revokedAt: null },
-        data: { revokedAt: expect.any(Date) },
+        data: { revokedAt: expect.any(Date) as Date },
       });
     });
   });

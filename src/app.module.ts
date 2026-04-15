@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto';
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { IncomingMessage } from 'http';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { validationSchema } from './config/validation.schema';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
@@ -15,6 +15,9 @@ import corsConfig from './config/cors.config';
 import throttlerConfig from './config/throttler.config';
 import { PrismaModule } from './database/prisma.module';
 import { RbacModule } from './rbac/rbac.module';
+import { HealthModule } from './health/health.module';
+
+type RequestWithId = IncomingMessage & { id?: unknown };
 
 @Module({
   imports: [
@@ -38,6 +41,7 @@ import { RbacModule } from './rbac/rbac.module';
     PrismaModule,
     AuthModule,
     RbacModule,
+    HealthModule,
     LoggerModule.forRootAsync({
       useFactory: () => ({
         pinoHttp: {
@@ -54,8 +58,13 @@ import { RbacModule } from './rbac/rbac.module';
             ],
             censor: '[REDACTED]',
           },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          genReqId: (req: any): string => req.id ?? randomUUID(),
+
+          genReqId: (req: RequestWithId): string =>
+            typeof req.id === 'string'
+              ? req.id
+              : typeof req.id === 'number'
+                ? String(req.id)
+                : randomUUID(),
         },
       }),
     }),
@@ -63,10 +72,4 @@ import { RbacModule } from './rbac/rbac.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CorrelationIdMiddleware)
-      .forRoutes({ path: '*path', method: RequestMethod.ALL });
-  }
-}
+export class AppModule {}

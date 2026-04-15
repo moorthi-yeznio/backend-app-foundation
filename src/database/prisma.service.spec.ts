@@ -8,9 +8,11 @@ jest.mock('@prisma/adapter-pg', () => ({
 jest.mock('@prisma/client', () => {
   const mockConnect = jest.fn().mockResolvedValue(undefined);
   const mockDisconnect = jest.fn().mockResolvedValue(undefined);
-  const MockPrismaClient = jest.fn().mockImplementation(function () {
-    this.$connect = mockConnect;
-    this.$disconnect = mockDisconnect;
+  const MockPrismaClient = jest.fn().mockImplementation(() => {
+    return {
+      $connect: mockConnect,
+      $disconnect: mockDisconnect,
+    };
   });
   return { PrismaClient: MockPrismaClient };
 });

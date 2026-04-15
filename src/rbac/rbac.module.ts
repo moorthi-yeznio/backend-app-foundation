@@ -1,13 +1,7 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from './guards/permissions.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { TenantContextMiddleware } from './middleware/tenant-context.middleware';
 
 @Module({
   providers: [
@@ -24,10 +18,4 @@ import { TenantContextMiddleware } from './middleware/tenant-context.middleware'
   ],
   exports: [RolesGuard, PermissionsGuard],
 })
-export class RbacModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TenantContextMiddleware)
-      .forRoutes({ path: '*path', method: RequestMethod.ALL });
-  }
-}
+export class RbacModule {}

@@ -1,14 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
+import { TenantContextMiddleware } from './rbac/middleware/tenant-context.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
+  app.useGlobalFilters(new AllExceptionsFilter());
+  const correlationIdMiddleware = new CorrelationIdMiddleware();
+  const tenantContextMiddleware = new TenantContextMiddleware();
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    correlationIdMiddleware.use(req, res, next),
+  );
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    tenantContextMiddleware.use(req, res, next),
+  );
   const config = app.get(ConfigService);
 
   // ── Security headers ──────────────────────────────────────────────
@@ -26,12 +39,7 @@ async function bootstrap() {
   // ── API versioning ─────────────────────────────────────────────────
   const prefix = config.get<string>('app.prefix') ?? 'api';
   const version = config.get<string>('app.version') ?? 'v1';
-  app.setGlobalPrefix(prefix);
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: version,
-    prefix: false,
-  });
+  app.setGlobalPrefix(`${prefix}/${version}`);
 
   // ── Global validation pipe ────────────────────────────────────────
   app.useGlobalPipes(
@@ -69,4 +77,4 @@ async function bootstrap() {
   logger.log(`Application running on port ${port}`, 'Bootstrap');
 }
 
-bootstrap();
+void bootstrap();

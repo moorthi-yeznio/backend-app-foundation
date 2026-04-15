@@ -47,7 +47,13 @@ export class AuthService {
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email, deletedAt: null },
-      select: { id: true, email: true, passwordHash: true, firstName: true, lastName: true },
+      select: {
+        id: true,
+        email: true,
+        passwordHash: true,
+        firstName: true,
+        lastName: true,
+      },
     });
 
     if (!user) {
@@ -59,7 +65,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const { passwordHash: _, ...safeUser } = user;
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
     return this.issueTokens(safeUser);
   }
 
@@ -120,17 +131,19 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(payload, {
         secret: this.config.get<string>('jwt.secret'),
-        expiresIn: this.config.get<string>('jwt.expiresIn') as msType.StringValue,
+        expiresIn: this.config.get<string>(
+          'jwt.expiresIn',
+        ) as msType.StringValue,
       }),
       this.jwt.signAsync(payload, {
         secret: this.config.get<string>('jwt.refreshSecret'),
-        expiresIn: this.config.get<string>('jwt.refreshExpiresIn') as msType.StringValue,
+        expiresIn: this.config.get<string>(
+          'jwt.refreshExpiresIn',
+        ) as msType.StringValue,
       }),
     ]);
 
-    const tokenHash = createHash('sha256')
-      .update(refreshToken)
-      .digest('hex');
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);

@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from 'nestjs-pino';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -6,7 +7,8 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
   const config = app.get(ConfigService);
 
   // ── Security headers ──────────────────────────────────────────────
@@ -62,7 +64,9 @@ async function bootstrap() {
 
   // ── Start ─────────────────────────────────────────────────────────
   const port = config.get<number>('app.port') ?? 3000;
+  const logger = app.get(Logger);
   await app.listen(port);
+  logger.log(`Application running on port ${port}`, 'Bootstrap');
 }
 
 bootstrap();

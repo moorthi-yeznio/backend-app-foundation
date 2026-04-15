@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { createHash } from 'crypto';
+import type msType from 'ms';
 import { PrismaService } from '../database/prisma.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -119,11 +120,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(payload, {
         secret: this.config.get<string>('jwt.secret'),
-        expiresIn: this.config.get<string>('jwt.expiresIn') as unknown as number,
+        expiresIn: this.config.get<string>('jwt.expiresIn') as msType.StringValue,
       }),
       this.jwt.signAsync(payload, {
         secret: this.config.get<string>('jwt.refreshSecret'),
-        expiresIn: this.config.get<string>('jwt.refreshExpiresIn') as unknown as number,
+        expiresIn: this.config.get<string>('jwt.refreshExpiresIn') as msType.StringValue,
       }),
     ]);
 
